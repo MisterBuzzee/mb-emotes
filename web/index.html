@@ -24,13 +24,13 @@
     .tab:hover { color:var(--text); background:rgba(255,255,255,0.05); }
     .tab.active { color:var(--green); background:var(--green-15); border-color:var(--green); font-weight:600; }
     .body { flex:1; display:flex; overflow:hidden; }
-    .grid { flex:1; overflow-y:auto; padding:1.4vh; display:grid; grid-template-columns:repeat(auto-fill,minmax(12vh,1fr)); gap:0.6vh; align-content:start; }
+    .grid { flex:1; overflow-y:auto; padding:1.4vh; display:grid; grid-template-columns:repeat(auto-fill,minmax(16vh,1fr)); gap:0.8vh; align-content:start; }
     .grid::-webkit-scrollbar { width:0.6vh; }
     .grid::-webkit-scrollbar-thumb { background:rgba(54,255,159,0.3); border-radius:0.3vh; }
-    .card { background:var(--row); border:1px solid var(--line); border-radius:0.8vh; padding:1vh 0.8vh; cursor:pointer; transition:all .12s; display:flex; flex-direction:column; align-items:center; gap:0.5vh; text-align:center; }
+    .card { background:var(--row); border:1px solid var(--line); border-radius:0.8vh; padding:1.2vh 1vh; cursor:pointer; transition:all .12s; display:flex; flex-direction:column; align-items:center; gap:0.6vh; text-align:center; min-height:8vh; }
     .card:hover { background:var(--control); border-color:var(--green); transform:translateY(-0.1vh); }
-    .card .icon { font-size:1.6vh; color:var(--green); }
-    .card .name { font-size:1.1vh; color:var(--text-2); overflow:hidden; text-overflow:ellipsis; white-space:nowrap; width:100%; }
+    .card .icon { font-size:1.8vh; color:var(--green); }
+    .card .name { font-size:1.1vh; color:var(--text-2); word-break:break-word; line-height:1.3; }
     .footer { padding:0.8vh 1.8vh; border-top:1px solid var(--line-strong); display:flex; justify-content:space-between; align-items:center; font-size:1.1vh; color:var(--text-3); background:var(--header); }
     .footer .count { color:var(--green); font-weight:700; }
     .empty { color:var(--text-3); font-size:1.3vh; padding:4vh; text-align:center; grid-column:1/-1; }
