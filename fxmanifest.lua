@@ -19,4 +19,5 @@ files {
 	'locales/*.json',
 	'data/emotes.json',
 	'web/index.html',
+	'stream/**',
 }
