@@ -85,6 +85,9 @@
           const name = el.getAttribute('data-name');
           fetch('https://mb-emotes/playEmote', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ name }) });
           if (!recent.includes(name)) { recent.unshift(name); if (recent.length > 20) recent.pop(); saveRecent(); }
+          // Close the menu after picking an emote.
+          fetch('https://mb-emotes/close', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: '{}' });
+          panel.classList.remove('show');
         };
         el.oncontextmenu = (ev) => {
           ev.preventDefault();
