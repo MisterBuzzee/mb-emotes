@@ -46,6 +46,9 @@
         <div class="tab active" data-cat="all">All</div>
         <div class="tab" data-cat="fav">Favorites</div>
         <div class="tab" data-cat="recent">Recent</div>
+        <div class="tab" data-cat="scenario">Scenarios</div>
+        <div class="tab" data-cat="dance">Dances</div>
+        <div class="tab" data-cat="gesture">Gestures</div>
       </div>
       <div class="body">
         <div class="grid" id="grid"></div>
@@ -74,8 +77,11 @@
     function render() {
       const q = search.value.toLowerCase();
       let items = emotes;
-      if (activeCat === 'fav') items = favorites;
-      else if (activeCat === 'recent') items = recent;
+      if (activeCat === 'fav') items = favorites.map(n => emotes.find(e => e.name === n)).filter(Boolean);
+      else if (activeCat === 'recent') items = recent.map(n => emotes.find(e => e.name === n)).filter(Boolean);
+      else if (activeCat === 'scenario') items = items.filter(e => e.type === 'scenario');
+      else if (activeCat === 'dance') items = items.filter(e => /dance/i.test(e.name) || /dance/i.test(e.label));
+      else if (activeCat === 'gesture') items = items.filter(e => /wave|salute|point|thumbs|shrug|nod|clap|beckon|surrender|finger/i.test(e.name));
       if (q) items = items.filter(e => (e.label || e.name).toLowerCase().includes(q) || e.name.toLowerCase().includes(q));
       if (items.length === 0) { grid.innerHTML = '<div class="empty">No emotes found</div>'; count.textContent = 0; return; }
       grid.innerHTML = items.map(e => `<div class="card" data-name="${e.name}"><span class="icon">▶</span><span class="name">${e.label || e.name}</span></div>`).join('');
