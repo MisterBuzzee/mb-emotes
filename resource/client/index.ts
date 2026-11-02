@@ -46,7 +46,7 @@ async function playEmote(name: string): Promise<boolean> {
     return false;
   }
   if (!(await requestDict(entry.dict))) {
-    notify(Locale("EMOTE_NOT_FOUND"), "error");
+    notify(`Dict not found: ${entry.dict}`, "error");
     return false;
   }
   TaskPlayAnim(PlayerPedId(), entry.dict, entry.anim, 8.0, -8.0, -1, 49, 0, false, false, false);
@@ -67,6 +67,7 @@ RegisterNuiCallback("close", (_data: unknown, cb: (v: unknown) => void) => {
 });
 
 RegisterCommand("emotes", () => {
+  notify(`Loaded ${emotes.length} emotes`, "info");
   SetNuiFocus(true, true);
   SendNUIMessage({ action: "open", emotes });
 }, false);
