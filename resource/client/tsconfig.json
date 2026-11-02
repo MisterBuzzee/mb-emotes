@@ -1,0 +1,1 @@
+{ "extends": "../../tsconfig.json", "compilerOptions": { "types": ["@citizenfx/client"], "paths": { "common": ["../common"], "common/*": ["../common/*"] } }, "include": ["./", "../common/"] }

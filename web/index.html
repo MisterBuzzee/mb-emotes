@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>mb-emotes</title>
+  <style>
+    :root { --bg:#0b0f1a; --panel:#111827; --accent:#00e5ff; --text:#e6f1ff; --muted:#6b7a99; --card:#1a2236; --cardHover:#222d45; --border:rgba(0,229,255,0.18); }
+    * { box-sizing:border-box; margin:0; padding:0; }
+    html,body { width:100%; height:100%; overflow:hidden; font-family:"Inter","Segoe UI",system-ui,sans-serif; background:transparent; color:var(--text); }
+    #root { position:fixed; inset:0; display:flex; align-items:center; justify-content:center; pointer-events:none; }
+    #panel { pointer-events:auto; width:820px; max-width:96vw; height:82vh; background:linear-gradient(180deg,#131a2b 0%,#0b0f1a 100%); border:1px solid var(--border); border-radius:18px; box-shadow:0 0 60px rgba(0,229,255,0.12),inset 0 0 80px rgba(0,0,0,0.5); display:none; flex-direction:column; overflow:hidden; animation:pop .18s ease-out; }
+    #panel.show { display:flex; }
+    @keyframes pop { from{transform:scale(.94);opacity:0} to{transform:scale(1);opacity:1} }
+    .header { padding:16px 20px 12px; border-bottom:1px solid var(--border); display:flex; align-items:center; justify-content:space-between; gap:12px; }
+    .brand { font-size:17px; font-weight:700; letter-spacing:1px; text-transform:uppercase; color:var(--accent); text-shadow:0 0 8px rgba(0,229,255,0.6); }
+    .search { flex:1; max-width:320px; padding:8px 12px; background:#0d1320; border:1px solid var(--border); border-radius:8px; color:var(--text); font-size:13px; outline:none; }
+    .search:focus { border-color:var(--accent); box-shadow:0 0 10px rgba(0,229,255,0.3); }
+    .close { padding:6px 12px; background:rgba(0,229,255,0.12); border:1px solid var(--accent); border-radius:6px; color:var(--accent); font-weight:600; cursor:pointer; font-size:11px; }
+    .close:hover { background:var(--accent); color:#000; }
+    .tabs { display:flex; gap:6px; padding:10px 20px; border-bottom:1px solid var(--border); overflow-x:auto; }
+    .tab { padding:6px 14px; border-radius:6px; cursor:pointer; font-size:12px; color:var(--muted); background:rgba(255,255,255,0.03); border:1px solid transparent; transition:all .12s; white-space:nowrap; }
+    .tab:hover { color:var(--text); background:rgba(0,229,255,0.08); }
+    .tab.active { color:var(--accent); background:rgba(0,229,255,0.15); border-color:var(--accent); font-weight:600; }
+    .body { flex:1; display:flex; overflow:hidden; }
+    .grid { flex:1; overflow-y:auto; padding:16px; display:grid; grid-template-columns:repeat(auto-fill,minmax(130px,1fr)); gap:8px; align-content:start; }
+    .grid::-webkit-scrollbar { width:6px; }
+    .grid::-webkit-scrollbar-thumb { background:rgba(0,229,255,0.3); border-radius:3px; }
+    .card { background:var(--card); border:1px solid var(--border); border-radius:10px; padding:12px 10px; cursor:pointer; transition:all .12s; display:flex; flex-direction:column; align-items:center; gap:6px; text-align:center; }
+    .card:hover { background:var(--cardHover); border-color:var(--accent); transform:translateY(-2px); box-shadow:0 4px 16px rgba(0,229,255,0.15); }
+    .card .icon { font-size:22px; color:var(--accent); }
+    .card .name { font-size:11px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; width:100%; }
+    .footer { padding:8px 20px; border-top:1px solid var(--border); display:flex; justify-content:space-between; align-items:center; font-size:11px; color:var(--muted); }
+    .footer .count { color:var(--accent); font-weight:700; }
+    .close { padding:6px 12px; background:rgba(0,229,255,0.12); border:1px solid var(--accent); border-radius:6px; color:var(--accent); font-weight:600; cursor:pointer; font-size:11px; }
+    .close:hover { background:var(--accent); color:#000; }
+    .empty { color:var(--muted); font-size:13px; padding:40px; text-align:center; grid-column:1/-1; }
+  </style>
+</head>
+<body>
+  <div id="root">
+    <div id="panel">
+      <div class="header">
+        <div class="brand">Emote Menu</div>
+        <input class="search" id="search" placeholder="Search emotes..." />
+        <button class="close" id="closeBtn">Close</button>
+      </div>
+      <div class="tabs" id="tabs">
+        <div class="tab active" data-cat="all">All</div>
+        <div class="tab" data-cat="fav">Favorites</div>
+        <div class="tab" data-cat="recent">Recent</div>
+      </div>
+      <div class="body">
+        <div class="grid" id="grid"></div>
+      </div>
+      <div class="footer">
+        <span><span class="count" id="count">0</span> emotes</span>
+        <span>Click to play · ESC to close · Right-click to favorite</span>
+      </div>
+    </div>
+  </div>
+  <script>
+    const panel = document.getElementById('panel');
+    const grid = document.getElementById('grid');
+    const search = document.getElementById('search');
+    const count = document.getElementById('count');
+    const closeBtn = document.getElementById('closeBtn');
+    const tabs = [...document.querySelectorAll('.tab')];
+    let emotes = [];
+    let activeCat = 'all';
+    let favorites = JSON.parse(localStorage.getItem('mbemotes_fav') || '[]');
+    let recent = JSON.parse(localStorage.getItem('mbemotes_recent') || '[]');
+
+    function saveFav() { localStorage.setItem('mbemotes_fav', JSON.stringify(favorites)); }
+    function saveRecent() { localStorage.setItem('mbemotes_recent', JSON.stringify(recent)); }
+
+    function render() {
+      const q = search.value.toLowerCase();
+      let items = emotes;
+      if (activeCat === 'fav') items = favorites;
+      else if (activeCat === 'recent') items = recent;
+      if (q) items = items.filter(e => (e.label || e.name).toLowerCase().includes(q) || e.name.toLowerCase().includes(q));
+      if (items.length === 0) { grid.innerHTML = '<div class="empty">No emotes found</div>'; count.textContent = 0; return; }
+      grid.innerHTML = items.map(e => `<div class="card" data-name="${e.name}"><span class="icon">▶</span><span class="name">${e.label || e.name}</span></div>`).join('');
+      count.textContent = items.length;
+      grid.querySelectorAll('.card').forEach(el => {
+        el.onclick = () => {
+          const name = el.getAttribute('data-name');
+          fetch('https://mb-emotes/playEmote', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ name }) });
+          if (!recent.includes(name)) { recent.unshift(name); if (recent.length > 20) recent.pop(); saveRecent(); }
+        };
+        el.oncontextmenu = (ev) => {
+          ev.preventDefault();
+          const name = el.getAttribute('data-name');
+          if (favorites.includes(name)) favorites = favorites.filter(x => x !== name);
+          else favorites.push(name);
+          saveFav();
+          render();
+        };
+      });
+    }
+
+    window.addEventListener('message', (e) => {
+      const d = e.data;
+      if (!d || d.action !== 'open') return;
+      emotes = d.emotes || [];
+      render();
+      search.value = '';
+      panel.classList.add('show');
+    });
+
+    search.addEventListener('input', render);
+    closeBtn.onclick = () => { fetch('https://mb-emotes/close', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: '{}' }); panel.classList.remove('show'); };
+    document.querySelectorAll('.tab').forEach(t => t.onclick = () => { document.querySelectorAll('.tab').forEach(x => x.classList.remove('active')); t.classList.add('active'); activeCat = t.getAttribute('data-cat'); render(); });
+    document.addEventListener('keydown', (e) => { if (e.key === 'Escape') closeBtn.click(); });
+  </script>
+</body>
+</html>
