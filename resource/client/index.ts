@@ -66,6 +66,12 @@ RegisterNuiCallback("close", (_data: unknown, cb: (v: unknown) => void) => {
   cb(true);
 });
 
+onNet("mb-emotes:client:open", () => {
+  notify(`Loaded ${emotes.length} emotes`, "info");
+  SetNuiFocus(true, true);
+  SendNUIMessage({ action: "open", emotes });
+});
+
 RegisterCommand("emotes", () => {
   notify(`Loaded ${emotes.length} emotes`, "info");
   SetNuiFocus(true, true);
